@@ -13,9 +13,9 @@
     {
         private struct DOCORDO_TEST
         {
-            public static string DOMAIN = "lit.docordo.com";
-            public static string USERNAME = "legalit";
-            public static string PASSWORD = "l3gal1t";
+            public static string DOMAIN = "0";
+            public static string USERNAME = "0";
+            public static string PASSWORD = "0";
 
             public static string SESSION_KEY = string.Empty;
             public static string JSESSIONID = string.Empty;
