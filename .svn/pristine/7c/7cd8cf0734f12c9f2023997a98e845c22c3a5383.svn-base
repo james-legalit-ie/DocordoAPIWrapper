@@ -1,0 +1,19 @@
+﻿namespace DocordoAPI.Model.Bean.Create
+{
+    public class DocordoCreateRecordBean
+    {
+        public string ExternalId { get; set; }
+        public string RecordDescription { get; set; }
+        public string ContainerRecordNumber { get; set; }
+
+        public static DocordoCreateRecordBean New(string containerRecordNumber, string recordDescription, string externalId)
+        {
+            return new DocordoCreateRecordBean()
+            {
+                ExternalId = externalId,
+                RecordDescription = recordDescription,
+                ContainerRecordNumber = containerRecordNumber
+            };
+        }
+    }
+}

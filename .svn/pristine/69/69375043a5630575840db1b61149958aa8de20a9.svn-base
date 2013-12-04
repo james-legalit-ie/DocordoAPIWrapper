@@ -1,0 +1,169 @@
+﻿namespace DocordoAPI.Test
+{
+    using System;
+    using System.IO;
+    using DocordoAPI.Model.Bean;
+    using DocordoAPI.Model.Bean.Create;
+    using DocordoAPI.Model.Domain;
+    using DocordoAPI.Test.Data.Domain.NodeTypeData;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+    [TestClass]
+    public class DocordoService_Test
+    {
+        private struct DOCORDO_TEST
+        {
+            public static string DOMAIN = "lit.docordo.com";
+            public static string USERNAME = "legalit";
+            public static string PASSWORD = "l3gal1t";
+
+            public static string SESSION_KEY = string.Empty;
+            public static string JSESSIONID = string.Empty;
+
+            public static string NODE_ID_DOCUMENT = "b9713be3a66a4968a051fe9df939ae28-fdff7a01fd0f45beb9d5f0274b22ab5e";
+            public static string NODE_TYPE_ID = "cd8f4c2bf5e8489d9efa2504e0ce4373";
+            public static string RECORD_NUMBER_CONTAINER = "SMI15/1";
+
+            public static string AD_HOC_DOCUMENT_PATH = @"C:\LITROOT\Projects\csharp\BriefBuilder\test\TEST_DOCUMENTS\IN\DOC_TEST.doc";
+        }
+
+        [ClassInitialize]
+        public static void Login(TestContext context)
+        {
+            DocordoLoginResponse docordoLoginResponse = DocordoService.GetInstance().Login(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.USERNAME, DOCORDO_TEST.PASSWORD);
+
+            DOCORDO_TEST.JSESSIONID = docordoLoginResponse.CookieJSESSIONID;
+            DOCORDO_TEST.SESSION_KEY = docordoLoginResponse.EbikkoSessionId;
+
+            Assert.IsNotNull(docordoLoginResponse);
+        }
+
+        [ClassCleanup]
+        public static void Logout()
+        {
+            DocordoLogoutResponse docordoLogoutResponse = DocordoService.GetInstance().Logout(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID);
+            Assert.IsNotNull(docordoLogoutResponse);
+        }
+
+        [TestMethod]
+        public void DownloadDocument()
+        {
+            Stream stream = DocordoService.GetInstance().DownloadContentByNodeId(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, DOCORDO_TEST.NODE_ID_DOCUMENT);
+            Assert.IsNotNull(stream);
+        }
+
+        [TestMethod]
+        public void ListNodeTypes()
+        {
+            DocordoNodeTypeListResponse docordoNodeTypeListResponse = DocordoService.GetInstance().LoadNodeTypes(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID);
+            Assert.IsNotNull(docordoNodeTypeListResponse);
+        }
+
+        [TestMethod]
+        public void LoadAttributesByNodeType()
+        {
+            DocordoAttributesResponse docordoAttributesResponse = DocordoService.GetInstance().LoadAttributesByNodeType(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, DOCORDO_TEST.NODE_TYPE_ID);
+            Assert.IsNotNull(docordoAttributesResponse);
+        }
+
+        [TestMethod]
+        public void LoadDocuments()
+        {
+            DocordoSearchResponse docordoSearchResponse = DocordoService.GetInstance().LoadContentByContainerRecordNumber(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, DOCORDO_TEST.RECORD_NUMBER_CONTAINER);
+            Assert.IsNotNull(docordoSearchResponse);
+        }
+
+        [TestMethod]
+        public void LoadNodeTypeDetail()
+        {
+            DocordoNodeTypeDetailResponse docordoNodeTypeDetailResponse = DocordoService.GetInstance().LoadNodeTypeDetail(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, DOCORDO_TEST.NODE_TYPE_ID);
+            foreach (DocordoNodeTypeDetail nodeTypeDetail in docordoNodeTypeDetailResponse.Results)
+            {
+                Assert.IsNotNull(nodeTypeDetail);
+            }
+            Assert.IsNotNull(docordoNodeTypeDetailResponse);
+        }
+
+        [TestMethod]
+        public void LoadNodesByContainerId()
+        {
+            DocordoSearchResponse docordoSearchResponse = DocordoService.GetInstance().LoadNodesByContainerId(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, "a21d6bcf0a844ac68b27b87f9a6c9625-id52c5e530f9481a82c04f01d616a15a");
+            Assert.IsNotNull(docordoSearchResponse);
+        }
+
+
+        [TestMethod]
+        public void LoadNodeByExternalIdTest()
+        {
+            DocordoCreateRecordBean docordoCreateMatterBean = DocordoCreateRecordBean.New("SMI15", "TEST MATTER CREATED FOR DELETION", Guid.NewGuid().ToString());
+
+            DocordoNodeCreateResponse docordoNodeCreateResponse = DocordoService.GetInstance().CreateMatter<DocordoMatterData>(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, docordoCreateMatterBean, DocordoMatterData.New(docordoCreateMatterBean.RecordDescription));
+            Assert.IsNotNull(docordoNodeCreateResponse);
+
+            DocordoSearchResponse docordoSearchByExternalIdResponse = DocordoService.GetInstance().LoadNodesByExternalId(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, docordoCreateMatterBean.ExternalId);
+            Assert.IsNotNull(docordoNodeCreateResponse);
+
+            DocordoNodeDeleteResponse docordoNodeDeleteResponse = DocordoService.GetInstance().DeleteNode(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, docordoSearchByExternalIdResponse.Results[0].NodeId);
+            Assert.IsNotNull(docordoNodeDeleteResponse);
+        }
+
+        [TestMethod]
+        public void CreateDeleteClient()
+        {
+            DocordoNodeCreateResponse docordoNodeCreateResponse = DocordoService.GetInstance().CreateEntity<DocordoEntityData>(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, DocordoCreateRecordBean.New(string.Empty, string.Empty, Guid.NewGuid().ToString()), DocordoEntityData.New("Client", "TEST ENTITY CREATED FROM DOCORDO"));
+            Assert.IsNotNull(docordoNodeCreateResponse);
+            DocordoNodeDeleteResponse docordoNodeDeleteResponse = DocordoService.GetInstance().DeleteNode(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, docordoNodeCreateResponse.NodeId);
+            Assert.IsNotNull(docordoNodeDeleteResponse);
+        }
+
+        [TestMethod]
+        public void CreateDeleteMatter()
+        {
+            DocordoNodeCreateResponse docordoNodeCreateResponse = DocordoService.GetInstance().CreateMatter<DocordoMatterData>(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, DocordoCreateRecordBean.New("SMI15", "TEST MATTER CREATED FOR DELETION", Guid.NewGuid().ToString()), DocordoMatterData.New("TEST MATTER CREATED FOR DELETION"));
+            Assert.IsNotNull(docordoNodeCreateResponse);
+            DocordoNodeDeleteResponse docordoNodeDeleteResponse = DocordoService.GetInstance().DeleteNode(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, docordoNodeCreateResponse.NodeId);
+            Assert.IsNotNull(docordoNodeDeleteResponse);
+        }
+
+        [TestMethod]
+        public void CreateDeleteFolder()
+        {
+            DocordoNodeCreateResponse docordoNodeCreateResponse = DocordoService.GetInstance().CreateFolder<DocordoFolderData>(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, DocordoCreateRecordBean.New("SMI15/15", "TEST FOLDER CREATED FROM DOCORDO API", Guid.NewGuid().ToString()), DocordoFolderData.New());
+            Assert.IsNotNull(docordoNodeCreateResponse);
+            DocordoNodeDeleteResponse docordoNodeDeleteResponse = DocordoService.GetInstance().DeleteNode(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, docordoNodeCreateResponse.NodeId);
+            Assert.IsNotNull(docordoNodeDeleteResponse);
+        }
+
+        [TestMethod]
+        public void CreateDeleteAdHocDocument()
+        {
+            //CREATE DOCUMENT
+            DocordoNodeCreateResponse docordoNodeCreateResponse = DocordoService.GetInstance().CreateAdHocDocument<DocordoAdHocDocumentData>(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, DocordoCreateRecordBean.New("42", "TEST DOCUMENT CREATED FROM DOCORDO API", Guid.NewGuid().ToString()), DocordoAdHocDocumentData.New());
+            Assert.IsNotNull(docordoNodeCreateResponse);
+
+            //UPLOAD DOCUMENT
+            DocordoSearchResponse docordoContentUploadResponse = DocordoService.GetInstance().UploadContent(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, DocordoUploadContentBean.New(Path.GetFileName(DOCORDO_TEST.AD_HOC_DOCUMENT_PATH), File.ReadAllBytes(DOCORDO_TEST.AD_HOC_DOCUMENT_PATH)));
+            Assert.IsNotNull(docordoContentUploadResponse);
+
+            //CHECK IN DOCUMENT
+            DocordoCheckInNodeResponse docordoCheckInNodeResponse = DocordoService.GetInstance().CheckInNode(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, DocordoCheckInNodeBean.New(DOCORDO_TEST.SESSION_KEY, docordoNodeCreateResponse.NodeId, docordoContentUploadResponse.Results[0].ContentId, docordoContentUploadResponse.Results[0].FieldName));
+            Assert.IsNotNull(docordoCheckInNodeResponse);
+
+            //DELETE
+            DocordoNodeDeleteResponse docordoNodeDeleteResponse = DocordoService.GetInstance().DeleteNode(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, docordoNodeCreateResponse.NodeId);
+            Assert.IsNotNull(docordoNodeDeleteResponse);
+        }
+
+        [TestMethod]
+        public void CreateDeleteAdHocDocumentAndUpload()
+        {
+            //CREATE DOCUMENT AND UPLOAD
+            DocordoNodeCreateResponse docordoNodeCreateResponse = DocordoService.GetInstance().CreateAdHocDocumentAndUpload<DocordoAdHocDocumentData>(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, DocordoCreateAdHocDocumentAndUploadBean.New(DocordoCreateRecordBean.New("42", "TEST DOCUMENT CREATED FROM DOCORDO API", Guid.NewGuid().ToString()), DocordoUploadContentBean.New(Path.GetFileName(DOCORDO_TEST.AD_HOC_DOCUMENT_PATH), File.ReadAllBytes(DOCORDO_TEST.AD_HOC_DOCUMENT_PATH))), DocordoAdHocDocumentData.New());
+            Assert.IsNotNull(docordoNodeCreateResponse);
+
+            //DELETE
+            DocordoNodeDeleteResponse docordoNodeDeleteResponse = DocordoService.GetInstance().DeleteNode(DOCORDO_TEST.DOMAIN, DOCORDO_TEST.SESSION_KEY, DOCORDO_TEST.JSESSIONID, docordoNodeCreateResponse.NodeId);
+            Assert.IsNotNull(docordoNodeDeleteResponse);
+        }
+    }
+}

@@ -1,0 +1,383 @@
+﻿namespace DocordoAPI
+{
+    using System.Collections.Specialized;
+    using System.IO;
+    using System.Linq;
+    using System.Net;
+    using System.Text;
+    using DocordoAPI.Model.Bean;
+    using DocordoAPI.Model.Bean.Create;
+    using DocordoAPI.Model.Constant;
+    using DocordoAPI.Model.Domain;
+    using DocordoAPI.Model.Domain.NodeType;
+    using DocordoAPI.Model.Exc;
+    using DocordoAPI.Model.Utility;
+    using LiquidEngine.Tools;
+    using Newtonsoft.Json;
+
+    public class DocordoService : IDocordoService
+    {
+        #region DOCORDO INTERACTION
+
+        public DocordoLoginResponse Login(string docordoDomain, string username, string password)
+        {
+            DocordoLoginResponse docordoLoginResponse = null;
+            try
+            {
+                using (WebClient client = new WebClient())
+                {
+                    string jsonLoginRequest = string.Format("http://{0}/Login?json={{%22username%22:%22{1}%22,%22password%22:%22{2}%22}}", docordoDomain, username, password);
+
+                    docordoLoginResponse = JsonConvert.DeserializeObject<DocordoLoginResponse>(client.DownloadString(jsonLoginRequest));
+                    docordoLoginResponse.CookieJSESSIONID = client.ResponseHeaders.Get("Set-Cookie");
+                }
+            }
+            catch (System.Exception)
+            {
+                throw DocordoLoginException.New();
+            }
+
+            return docordoLoginResponse;
+        }
+        public DocordoLogoutResponse Logout(string docordoDomain, string sessionKey, string cookieJSESSIONID)
+        {
+            DocordoLogoutResponse docordoLogoutResponse = null;
+            try
+            {
+                using (WebClient webClient = new WebClient())
+                {
+                    webClient.Headers.Add("Cookie: " + cookieJSESSIONID);
+                    string jsonLogoutRequest = string.Format("http://{0}/Logout?json={{%22ebikko_session_id%22:%22{1}%22}}", docordoDomain, sessionKey);
+                    docordoLogoutResponse = JsonConvert.DeserializeObject<DocordoLogoutResponse>(webClient.DownloadString(jsonLogoutRequest));
+                }
+
+            }
+            catch (System.Exception)
+            {
+                throw DocordoLoginException.New();
+            }
+            return docordoLogoutResponse;
+        }
+
+        public DocordoNodeTypeListResponse LoadNodeTypes(string docordoDomain, string sessionKey, string cookieJSESSIONID)
+        {
+            DocordoNodeTypeListResponse docordoLoadNodeTypesResponse = null;
+            try
+            {
+                using (WebClient webClient = new WebClient())
+                {
+                    webClient.Headers.Add("Cookie: " + cookieJSESSIONID);
+                    string jsonLoadNodeTypesRequest = string.Format("http://{0}/NodeType?json={{%22ebikko_session_id%22:%22{1}%22,%22method%22:%22NODETYPE_LIST%22}}", docordoDomain, sessionKey);
+                    docordoLoadNodeTypesResponse = JsonConvert.DeserializeObject<DocordoNodeTypeListResponse>(webClient.DownloadString(jsonLoadNodeTypesRequest));
+                }
+            }
+            catch (System.Exception)
+            {
+                throw DocordoLoginException.New();
+            }
+
+            return docordoLoadNodeTypesResponse;
+        }
+        public DocordoNodeTypeDetailResponse LoadNodeTypeDetail(string docordoDomain, string sessionKey, string cookieJSESSIONID, string nodeTypeId)
+        {
+            DocordoNodeTypeDetailResponse docordoNodeTypeDetailResponse = null;
+            try
+            {
+                using (WebClient webClient = new WebClient())
+                {
+                    webClient.Headers.Add("Cookie: " + cookieJSESSIONID);
+                    string jsonLoadNodeTypesRequest = string.Format("http://{0}/NodeType?json={{%22ebikko_session_id%22:%22{1}%22,%22method%22:%22NODETYPE_DETAIL%22,%22node_type_id%22:%22{2}%22%20}}", docordoDomain, sessionKey, nodeTypeId);
+                    docordoNodeTypeDetailResponse = JsonConvert.DeserializeObject<DocordoNodeTypeDetailResponse>(webClient.DownloadString(jsonLoadNodeTypesRequest));
+                }
+            }
+            catch (System.Exception)
+            {
+                throw DocordoLoginException.New();
+            }
+
+            return docordoNodeTypeDetailResponse;
+        }
+        public DocordoAttributesResponse LoadAttributesByNodeType(string docordoDomain, string sessionKey, string cookieJSESSIONID, string nodeTypeId)
+        {
+            DocordoAttributesResponse docordoPropertyResponse = null;
+            try
+            {
+                using (WebClient webClient = new WebClient())
+                {
+                    webClient.Headers.Add("Cookie: " + cookieJSESSIONID);
+                    string jsonLoadNodeTypesRequest = string.Format("http://{0}/Property?json={{%22ebikko_session_id%22:%22{1}%22,%22property_id%22:%22%22,%22node_type_id%22:%22{2}%22%20,%22method%22:%22PROPERTY_LIST_ATTTIBUTES_FORM%22}}", docordoDomain, sessionKey, nodeTypeId);
+                    docordoPropertyResponse = JsonConvert.DeserializeObject<DocordoAttributesResponse>(webClient.DownloadString(jsonLoadNodeTypesRequest));
+                }
+            }
+            catch (System.Exception)
+            {
+                throw DocordoLoginException.New();
+            }
+
+            return docordoPropertyResponse;
+        }
+
+        public DocordoNodeCreateResponse CreateNode<T>(string docordoDomain, string sessionKey, string cookieJSESSIONID, DocordoBaseNode<T> docordoNode)
+        {
+            DocordoNodeCreateResponse docordoNodeCreateResponse = null;
+
+            using (WebClient webClient = new WebClient())
+            {
+                try
+                {
+                    webClient.Headers.Add("Cookie: " + cookieJSESSIONID);
+                    webClient.Headers.Add("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+
+                    string jsonRequest = JsonConvert.SerializeObject(docordoNode);
+                    byte[] byteArray = System.Text.Encoding.UTF8.GetBytes("json=" + jsonRequest);
+                    byte[] byteResult = webClient.UploadData(string.Format("http://{0}/Node", docordoDomain), "POST", byteArray);
+                    docordoNodeCreateResponse = JsonConvert.DeserializeObject<DocordoNodeCreateResponse>(Encoding.ASCII.GetString(byteResult));
+                }
+                catch (WebException ex)
+                {
+                    string exceptionData = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
+                }
+            }
+
+            return docordoNodeCreateResponse;
+        }
+        public DocordoCheckInNodeResponse CheckInNode(string docordoDomain, string sessionKey, string cookieJSESSIONID, DocordoCheckInNodeBean docordoCheckInNodeBean)
+        {
+            DocordoCheckInNodeResponse docordoCheckInNodeResponse = null;
+            using (WebClient webClient = new WebClient())
+            {
+                try
+                {
+                    webClient.Headers.Add("Cookie: " + cookieJSESSIONID);
+                    string jsonRequest = JsonConvert.SerializeObject(docordoCheckInNodeBean);
+                    byte[] byteResult = webClient.UploadData(string.Format("http://{0}/Node?json={1}", docordoDomain, jsonRequest), "POST", new byte[] { });
+                    docordoCheckInNodeResponse = JsonConvert.DeserializeObject<DocordoCheckInNodeResponse>(Encoding.ASCII.GetString(byteResult));
+                }
+                catch (WebException ex)
+                {
+                    string jsonResponse = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
+                }
+            }
+
+            return docordoCheckInNodeResponse;
+        }
+        public DocordoNodeDeleteResponse DeleteNode(string docordoDomain, string sessionKey, string cookieJSESSIONID, params string[] nodeIds)
+        {
+            DocordoNodeDeleteResponse docordoNodeDeleteResponse = null;
+
+            using (WebClient webClient = new WebClient())
+            {
+                try
+                {
+                    webClient.Headers.Add("Cookie: " + cookieJSESSIONID);
+
+                    string jsonRequest = JsonConvert.SerializeObject(DocordoDeleteNodeBean.New(sessionKey, nodeIds));
+                    byte[] byteResult = webClient.UploadData(string.Format("http://{0}/Node?json={1}", docordoDomain, jsonRequest), "DELETE", new byte[] { });
+                    docordoNodeDeleteResponse = JsonConvert.DeserializeObject<DocordoNodeDeleteResponse>(Encoding.ASCII.GetString(byteResult));
+                }
+                catch (WebException ex)
+                {
+                    string exceptionData = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
+                }
+            }
+
+            return docordoNodeDeleteResponse;
+        }
+        
+        #endregion
+
+        #region LOAD NODES BY PROPERTY VALUE
+
+        public DocordoSearchResponse LoadNodesByPropertyValue(string docordoDomain, string sessionKey, string cookieJSESSIONID, int property, string value) {
+            return LoadNodesByPropertyValue<int>(docordoDomain, sessionKey, cookieJSESSIONID, property, value);
+        }
+        public DocordoSearchResponse LoadNodesByPropertyValue(string docordoDomain, string sessionKey, string cookieJSESSIONID, string property, string value)
+        {
+            return LoadNodesByPropertyValue<string>(docordoDomain, sessionKey, cookieJSESSIONID, property, value);
+        }
+        
+        public DocordoSearchResponse LoadNodesByPropertyValue<T>(string docordoDomain, string sessionKey, string cookieJSESSIONID, T property, string value)
+        {
+
+            DocordoSearchResponse docordoSearchResponse = null;
+
+            using (WebClient webClient = new WebClient())
+            {
+                webClient.Headers.Add("Cookie: " + cookieJSESSIONID);
+                string jsonRequest =
+                    string.Format("http://{0}/NodeListing?anode=&start=0&limit=2000&json={{%22ebikko_session_id%22:%22{1}%22,%22query%22:{{%22op%22:%22EQUALS%22,%22lhs%22:%22{2}%22,%22rhs%22:%22{3}%22,%22rhs2%22:%22%22}},%22filters%22:" +
+                JsonConvert.SerializeObject(LoadNodeTypes(docordoDomain, sessionKey, cookieJSESSIONID).Results.Select(k => k.NodeTypeId).ToArray()).Replace("\"", "%22")
+                + ",%22method%22:%22SEARCH%22}}", docordoDomain, sessionKey, property, value);
+                docordoSearchResponse = JsonConvert.DeserializeObject<DocordoSearchResponse>(webClient.DownloadString(jsonRequest));
+            }
+
+            return docordoSearchResponse;
+        }
+
+        #endregion
+
+        #region CONTENT CONTROL
+
+        public DocordoSearchResponse UploadContent(string docordoDomain, string sessionKey, string cookieJSESSIONID, DocordoUploadContentBean uploadContentBean)
+        {
+            DocordoSearchResponse uploadContentResponse = null;
+
+            try
+            {
+                string jsonRequest = string.Format("http://{0}/UploadContent?json={{%22ebikko_session_id%22:%22{1}%22}}", docordoDomain, sessionKey);
+
+                NameValueCollection nameValueCollection = new NameValueCollection();
+                nameValueCollection.Add("ebikko-session-id", sessionKey);
+                nameValueCollection.Add("ebikko-web-gui-id", "ext-gen");
+
+                byte[] jsonResult = HttpUtility.UploadFile(cookieJSESSIONID, jsonRequest, uploadContentBean.FileName, uploadContentBean.FileByteArray, nameValueCollection);
+
+                uploadContentResponse = JsonConvert.DeserializeObject<DocordoSearchResponse>(Encoding.UTF8.GetString(jsonResult));
+            }
+            catch (WebException ex)
+            {
+                string jsonResponse = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
+            }
+            return uploadContentResponse;
+        }
+
+        public Stream DownloadContentByNodeId(string docordoDomain, string sessionKey, string cookieJSESSIONID, string nodeId)
+        {
+            Stream docordoContentStream = null;
+            try
+            {
+                using (WebClient webClient = new WebClient())
+                {
+                    webClient.Headers.Add("Cookie: " + cookieJSESSIONID);
+                    string jsonContentRequest = string.Format("http://{0}/Content?json={{%22ebikko_session_id%22:%22{1}%22,%22method%22:%22CONTENT_DOWNLOAD%22,%22version%22:0,%22node_id%22:%22{2}%22}}", docordoDomain, sessionKey, nodeId);
+                    DocordoContentResponse docordoContentResponse = JsonConvert.DeserializeObject<DocordoContentResponse>(webClient.DownloadString(jsonContentRequest));
+                    docordoContentStream = new MemoryTributary(webClient.DownloadData(string.Format("http://{0}{1}", docordoDomain, docordoContentResponse.Data.Url)));
+                    docordoContentStream.Seek(0, SeekOrigin.Begin);
+                }
+            }
+            catch (System.Exception)
+            {
+                throw DocordoLoginException.New();
+            }
+
+            return docordoContentStream;
+        }
+
+        public DocordoSearchResponse LoadContentByContainerRecordNumber(string docordoDomain, string sessionKey, string cookieJSESSIONID, string docordoRecordNumber)
+        {
+            DocordoSearchResponse docordoContainerSearchResponse = null;
+            DocordoSearchResponse docordoDocumentSearchResponse = null;
+
+            try
+            {
+                docordoContainerSearchResponse = LoadNodesByRecordNumber(docordoDomain, sessionKey, cookieJSESSIONID, docordoRecordNumber);
+
+                if (docordoContainerSearchResponse.Count >= 1)
+                {
+                    docordoDocumentSearchResponse = LoadNodesByContainerId(docordoDomain, sessionKey, cookieJSESSIONID, docordoContainerSearchResponse.Results.First().NodeId);
+                    docordoDocumentSearchResponse.Results.RemoveAll(k => k.FileName == null || k.FileName == string.Empty);
+                }
+                else
+                {
+                    docordoDocumentSearchResponse = docordoContainerSearchResponse;
+                }
+
+            }
+            catch (System.Exception)
+            {
+                throw DocordoLoginException.New();
+            }
+
+            return docordoDocumentSearchResponse;
+        }
+
+        #endregion
+
+        #region LOAD NODE HELPERS
+
+        public DocordoSearchResponse LoadNodesByExternalId(string docordoDomain, string sessionKey, string cookieJSESSIONID, string externalId)
+        {
+            return LoadNodesByPropertyValue<int>(docordoDomain, sessionKey, cookieJSESSIONID, DocordoConstants.DefaultAttributes.EXTERNAL_ID, externalId);
+        }
+        public DocordoSearchResponse LoadNodesByRecordNumber(string docordoDomain, string sessionKey, string cookieJSESSIONID, string docordoRecordNumber)
+        {
+            return LoadNodesByPropertyValue<int>(docordoDomain, sessionKey, cookieJSESSIONID, DocordoConstants.DefaultAttributes.RECORD_NUMBER, docordoRecordNumber);
+        }
+        public DocordoSearchResponse LoadNodesByContainerId(string docordoDomain, string sessionKey, string cookieJSESSIONID, string containerId)
+        {
+            return LoadNodesByPropertyValue<int>(docordoDomain, sessionKey, cookieJSESSIONID, DocordoConstants.DefaultAttributes.CONTAINER_ID, containerId);
+        }
+
+        #endregion
+
+        #region CREATE HELPERS
+        public DocordoNodeCreateResponse CreateEntity<T>(string docordoDomain, string sessionKey, string cookieJSESSIONID, DocordoCreateRecordBean createClientBean, T docordoEntityData)
+        {
+            DocordoEntity<T> docordoEntity = DocordoEntity<T>.New(sessionKey, createClientBean.NodeId, createClientBean.ContainerRecordNumber, createClientBean.RecordDescription, createClientBean.ExternalId, docordoEntityData);
+            DocordoNodeCreateResponse docordoNodeCreateResponse = CreateNode<T>(docordoDomain, sessionKey, cookieJSESSIONID, docordoEntity);
+            return docordoNodeCreateResponse;
+        }
+
+        public DocordoNodeCreateResponse CreateMatter<T>(string docordoDomain, string sessionKey, string cookieJSESSIONID, DocordoCreateRecordBean createMatterBean, T docordoMatterData)
+        {
+            DocordoSearchResponse matterContainer = LoadNodesByRecordNumber(docordoDomain, sessionKey, cookieJSESSIONID, createMatterBean.ContainerRecordNumber);
+            DocordoMatter<T> docordoMatter = DocordoMatter<T>.New(sessionKey, createMatterBean.NodeId, matterContainer.Results.First().NodeId, createMatterBean.RecordDescription, createMatterBean.ExternalId, docordoMatterData);
+            DocordoNodeCreateResponse docordoNodeCreateResponse = CreateNode<T>(docordoDomain, sessionKey, cookieJSESSIONID, docordoMatter);
+
+            return docordoNodeCreateResponse;
+        }
+
+        public DocordoNodeCreateResponse CreateFolder<T>(string docordoDomain, string sessionKey, string cookieJSESSIONID, DocordoCreateRecordBean createFolderBean, T docordoFolderData)
+        {
+            DocordoSearchResponse folderContainer = LoadNodesByRecordNumber(docordoDomain, sessionKey, cookieJSESSIONID, createFolderBean.ContainerRecordNumber);
+            DocordoFolder<T> docordoFolder = DocordoFolder<T>.New(sessionKey, createFolderBean.NodeId, folderContainer.Results.First().NodeId, createFolderBean.RecordDescription, createFolderBean.ExternalId, docordoFolderData);
+            DocordoNodeCreateResponse docordoNodeCreateResponse = CreateNode<T>(docordoDomain, sessionKey, cookieJSESSIONID, docordoFolder);
+
+            return docordoNodeCreateResponse;
+        }
+
+        public DocordoNodeCreateResponse CreateAdHocDocument<T>(string docordoDomain, string sessionKey, string cookieJSESSIONID, DocordoCreateRecordBean createAdHocDocumentBean, T adHocDocumentData)
+        {
+            DocordoSearchResponse adHocDocumentContainer = LoadNodesByRecordNumber(docordoDomain, sessionKey, cookieJSESSIONID, createAdHocDocumentBean.ContainerRecordNumber);
+
+            DocordoAdHocDocument<T> docordoAdHocDocument = DocordoAdHocDocument<T>.New(sessionKey, createAdHocDocumentBean.NodeId, adHocDocumentContainer.Results.First().NodeId, createAdHocDocumentBean.RecordDescription, createAdHocDocumentBean.ExternalId, adHocDocumentData);
+            DocordoNodeCreateResponse docordoNodeCreateResponse = CreateNode<T>(docordoDomain, sessionKey, cookieJSESSIONID, docordoAdHocDocument);
+
+            return docordoNodeCreateResponse;
+        }
+
+        public DocordoNodeCreateResponse CreateAdHocDocumentAndUpload<T>(string docordoDomain, string sessionKey, string cookieJSESSIONID, DocordoCreateAdHocDocumentAndUploadBean createAdHocDocumentAndUploadBean, T adHocDocumentData)
+        {
+            //CREATE DOCUMENT
+            DocordoNodeCreateResponse docordoNodeCreateResponse = DocordoService.GetInstance().CreateAdHocDocument<T>(docordoDomain, sessionKey, cookieJSESSIONID, createAdHocDocumentAndUploadBean.CreateAdHocDocumentBean, adHocDocumentData);
+
+            //UPLOAD DOCUMENT
+            DocordoSearchResponse docordoContentUploadResponse = DocordoService.GetInstance().UploadContent(docordoDomain, sessionKey, cookieJSESSIONID, createAdHocDocumentAndUploadBean.UploadContentBean);
+
+            //CHECK IN DOCUMENT
+            DocordoCheckInNodeResponse docordoCheckInNodeResponse = DocordoService.GetInstance().CheckInNode(docordoDomain, sessionKey, cookieJSESSIONID, DocordoCheckInNodeBean.New(sessionKey, docordoNodeCreateResponse.NodeId, docordoContentUploadResponse.Results[0].ContentId, docordoContentUploadResponse.Results[0].FieldName));
+
+            return docordoNodeCreateResponse;
+        }
+
+        #endregion
+
+        private static DocordoService docordoService;
+
+        private DocordoService() { }
+
+        static DocordoService()
+        {
+            docordoService = new DocordoService();
+        }
+
+        public static IDocordoService GetInstance()
+        {
+            if (docordoService == null)
+            {
+                docordoService = new DocordoService();
+            }
+            return docordoService;
+        }
+    }
+}

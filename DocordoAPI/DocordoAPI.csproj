@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B5A49B4D-D462-4BD9-85BA-D0C82FA67F07}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DocordoAPI</RootNamespace>
+    <AssemblyName>DocordoAPI</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DocordoService.cs" />
+    <Compile Include="IDocordoService.cs" />
+    <Compile Include="Model\Bean\Create\DocordoCreateAdHocDocumentAndUploadBean.cs" />
+    <Compile Include="Model\Bean\DocordoCheckInNodeBean.cs" />
+    <Compile Include="Model\Bean\Create\DocordoCreateRecordBean.cs" />
+    <Compile Include="Model\Bean\DocordoDeleteNodeBean.cs" />
+    <Compile Include="Model\Bean\DocordoUploadContentBean.cs" />
+    <Compile Include="Model\Constant\DocordoAttributes.cs" />
+    <Compile Include="Model\Domain\DocordoCheckInNodeResponse.cs" />
+    <Compile Include="Model\Domain\DocordoNodeDeleteResponse.cs" />
+    <Compile Include="Model\Domain\NodeType\DocordoAdHocDocument.cs" />
+    <Compile Include="Model\Domain\NodeType\DocordoEntity.cs" />
+    <Compile Include="Model\Domain\DocordoAttribute.cs" />
+    <Compile Include="Model\Domain\DocordoBaseNode.cs" />
+    <Compile Include="Model\Domain\DocordoContentResponse.cs" />
+    <Compile Include="Model\Domain\DocordoData.cs" />
+    <Compile Include="Model\Domain\DocordoGroup.cs" />
+    <Compile Include="Model\Domain\DocordoLoginResponse.cs" />
+    <Compile Include="Model\Domain\DocordoLogoutResponse.cs" />
+    <Compile Include="Model\Domain\DocordoMembers.cs" />
+    <Compile Include="Model\Domain\DocordoNodeCreateResponse.cs" />
+    <Compile Include="Model\Domain\DocordoNodeTypeDetail.cs" />
+    <Compile Include="Model\Domain\DocordoNodeTypeDetailResponse.cs" />
+    <Compile Include="Model\Domain\DocordoNodeTypeListResponse.cs" />
+    <Compile Include="Model\Domain\DocordoPrincipalDetails.cs" />
+    <Compile Include="Model\Domain\DocordoPrincipalProfile.cs" />
+    <Compile Include="Model\Domain\DocordoProperty.cs" />
+    <Compile Include="Model\Domain\DocordoPropertyGroup.cs" />
+    <Compile Include="Model\Domain\DocordoPropertyResponse.cs" />
+    <Compile Include="Model\Domain\DocordoSearch.cs" />
+    <Compile Include="Model\Domain\DocordoSearchResponse.cs" />
+    <Compile Include="Model\Domain\NodeType\DocordoFolder.cs" />
+    <Compile Include="Model\Domain\NodeType\DocordoMatter.cs" />
+    <Compile Include="Model\Exc\DocordoLoginException.cs" />
+    <Compile Include="Model\Utility\HttpUtility.cs" />
+    <Compile Include="Model\Utility\MemoryTributary.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="lib\Newtonsoft.Json.dll" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

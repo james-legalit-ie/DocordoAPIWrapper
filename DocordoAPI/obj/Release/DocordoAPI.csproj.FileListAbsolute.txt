@@ -1,0 +1,10 @@
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI\bin\Release\DocordoAPI.dll
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI\bin\Release\DocordoAPI.pdb
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI\bin\Release\Newtonsoft.Json.dll
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI\obj\Release\DocordoAPI.dll
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI\obj\Release\DocordoAPI.pdb
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI\bin\Release\DocordoAPI.dll
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI\bin\Release\DocordoAPI.pdb
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI\bin\Release\Newtonsoft.Json.dll
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI\obj\Release\DocordoAPI.dll
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI\obj\Release\DocordoAPI.pdb

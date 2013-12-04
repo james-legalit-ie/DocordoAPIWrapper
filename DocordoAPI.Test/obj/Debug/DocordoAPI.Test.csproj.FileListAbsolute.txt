@@ -1,0 +1,16 @@
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI.Test\bin\Debug\DocordoAPI.Test.dll
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI.Test\bin\Debug\DocordoAPI.Test.pdb
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI.Test\bin\Debug\DocordoAPI.dll
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI.Test\bin\Debug\Newtonsoft.Json.dll
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI.Test\bin\Debug\DocordoAPI.pdb
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI.Test\obj\Debug\DocordoAPI.Test.csprojResolveAssemblyReference.cache
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI.Test\obj\Debug\DocordoAPI.Test.dll
+C:\Users\James\Documents\Visual Studio 2010\Projects\DocordoAPI.Test\obj\Debug\DocordoAPI.Test.pdb
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI.Test\bin\Debug\DocordoAPI.Test.dll
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI.Test\bin\Debug\DocordoAPI.Test.pdb
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI.Test\bin\Debug\DocordoAPI.dll
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI.Test\bin\Debug\Newtonsoft.Json.dll
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI.Test\bin\Debug\DocordoAPI.pdb
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI.Test\obj\Debug\DocordoAPI.Test.csprojResolveAssemblyReference.cache
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI.Test\obj\Debug\DocordoAPI.Test.dll
+C:\Users\James\Documents\Visual Studio 2012\Projects\DocordoAPI\DocordoAPI.Test\obj\Debug\DocordoAPI.Test.pdb
